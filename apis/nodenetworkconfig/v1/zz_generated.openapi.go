@@ -45,8 +45,7 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_Allocation(ref common.R
 				Properties: map[string]spec.Schema{
 					"network": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Network is the name of the network.",
-							Default:     "",
+							Description: "Network is the name of the network. The default is \"gke-pod-network\".",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -54,12 +53,13 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_Allocation(ref common.R
 					"pods": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Pods is the number of pods allocated from this network.",
+							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
 				},
-				Required: []string{"network"},
+				Required: []string{"pods"},
 			},
 		},
 	}
@@ -141,7 +141,12 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_NodeNetworkConfigSpec(r
 					"releasableCIDRs": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "atomic",
+								"x-kubernetes-list-map-keys": []interface{}{
+									"id",
+								},
+								"x-kubernetes-list-type":       "map",
+								"x-kubernetes-patch-merge-key": "id",
+								"x-kubernetes-patch-strategy":  "merge",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
@@ -197,7 +202,9 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_NodeNetworkConfigStatus
 								"x-kubernetes-list-map-keys": []interface{}{
 									"type",
 								},
-								"x-kubernetes-list-type": "map",
+								"x-kubernetes-list-type":       "map",
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
@@ -258,7 +265,9 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_PodCIDR(ref common.Refe
 								"x-kubernetes-list-map-keys": []interface{}{
 									"type",
 								},
-								"x-kubernetes-list-type": "map",
+								"x-kubernetes-list-type":       "map",
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
 							},
 						},
 						SchemaProps: spec.SchemaProps{

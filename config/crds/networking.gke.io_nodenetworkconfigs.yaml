@@ -62,7 +62,9 @@ spec:
                     network.
                   properties:
                     network:
-                      description: Network is the name of the network.
+                      default: gke-pod-network
+                      description: Network is the name of the network. The default
+                        is "gke-pod-network".
                       type: string
                     pods:
                       description: Pods is the number of pods allocated from this
@@ -70,7 +72,7 @@ spec:
                       format: int32
                       type: integer
                   required:
-                  - network
+                  - pods
                   type: object
                 type: array
                 x-kubernetes-list-type: atomic
@@ -156,7 +158,9 @@ spec:
                   - network
                   type: object
                 type: array
-                x-kubernetes-list-type: atomic
+                x-kubernetes-list-map-keys:
+                - id
+                x-kubernetes-list-type: map
             type: object
           status:
             description: NodeNetworkConfigStatus is the status for a NodeNetworkConfig
