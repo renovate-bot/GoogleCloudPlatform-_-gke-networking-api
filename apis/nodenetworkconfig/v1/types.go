@@ -88,13 +88,9 @@ type PodCIDR struct {
 	// +required
 	CIDR string `json:"cidr"`
 
-	// Conditions contains details for the current condition of this pod CIDR.
+	// Condition contains details for the current condition of this pod CIDR.
 	// +optional
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	Condition *metav1.Condition `json:"condition,omitempty"`
 }
 
 // NodeNetworkConfigStatus is the status for a NodeNetworkConfig resource.
