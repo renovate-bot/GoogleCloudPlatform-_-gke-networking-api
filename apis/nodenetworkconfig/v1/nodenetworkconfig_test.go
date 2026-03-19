@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 )
 
@@ -28,8 +29,28 @@ func TestNodeNetworkConfig(t *testing.T) {
 		Spec: NodeNetworkConfigSpec{
 			Allocations: []Allocation{
 				{
+					Pods: 100,
+				},
+			},
+		},
+		Status: NodeNetworkConfigStatus{
+			PodCIDRs: []PodCIDR{
+				{
+					Id:      "id-test",
 					Network: DefaultPodNetworkName,
-					Pods:    100,
+					CIDR:    "10.0.0.0/24",
+					Condition: &metav1.Condition{
+						Type:   string(PodCIDRConditionReady),
+						Status: metav1.ConditionTrue,
+						Reason: string(PodCIDRReady),
+					},
+				},
+			},
+			Conditions: []metav1.Condition{
+				{
+					Type:   string(NodeNetworkConfigConditionInvalidParameters),
+					Status: metav1.ConditionTrue,
+					Reason: string(NodeNetworkConfigInvalidParametersReason),
 				},
 			},
 		},
@@ -40,11 +61,44 @@ func TestNodeNetworkConfig(t *testing.T) {
 	}
 
 	allocation := nnc.Spec.Allocations[0]
-	if allocation.Network != DefaultPodNetworkName {
-		t.Errorf("expected network %q, got %q", DefaultPodNetworkName, allocation.Network)
+	// Explicitly test for empty string because the standard Go behavior defaults missing string fields to "",
+	// whereas the +kubebuilder:default annotation only takes effect when the object traverses the Kubernetes API Server.
+	if allocation.Network != "" {
+		t.Errorf("expected network %q, got %q", "", allocation.Network)
 	}
 	if allocation.Pods != 100 {
 		t.Errorf("expected pods 100, got %d", allocation.Pods)
+	}
+
+	if len(nnc.Status.PodCIDRs) != 1 {
+		t.Fatalf("expected 1 podCIDR, got %d", len(nnc.Status.PodCIDRs))
+	}
+	podCIDR := nnc.Status.PodCIDRs[0]
+	if podCIDR.Id != "id-test" {
+		t.Errorf("expected podCIDR id 'id-test', got %q", podCIDR.Id)
+	}
+	if podCIDR.Network != DefaultPodNetworkName {
+		t.Errorf("expected podCIDR network %q, got %q", DefaultPodNetworkName, podCIDR.Network)
+	}
+	if podCIDR.CIDR != "10.0.0.0/24" {
+		t.Errorf("expected podCIDR CIDR '10.0.0.0/24', got %q", podCIDR.CIDR)
+	}
+	if podCIDR.Condition == nil || podCIDR.Condition.Type != string(PodCIDRConditionReady) || podCIDR.Condition.Status != metav1.ConditionTrue {
+		t.Errorf("expected podCIDR condition Ready=True, got %v", podCIDR.Condition)
+	}
+
+	if len(nnc.Status.Conditions) != 1 {
+		t.Fatalf("expected 1 condition, got %d", len(nnc.Status.Conditions))
+	}
+	condition := nnc.Status.Conditions[0]
+	if condition.Type != string(NodeNetworkConfigConditionInvalidParameters) {
+		t.Errorf("expected condition type %q, got %q", NodeNetworkConfigConditionInvalidParameters, condition.Type)
+	}
+	if condition.Status != metav1.ConditionTrue {
+		t.Errorf("expected condition status True, got %q", condition.Status)
+	}
+	if condition.Reason != string(NodeNetworkConfigInvalidParametersReason) {
+		t.Errorf("expected condition reason %q, got %q", NodeNetworkConfigInvalidParametersReason, condition.Reason)
 	}
 }
 
