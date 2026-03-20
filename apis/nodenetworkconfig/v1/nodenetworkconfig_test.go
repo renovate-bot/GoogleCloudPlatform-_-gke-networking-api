@@ -37,18 +37,17 @@ func TestNodeNetworkConfig(t *testing.T) {
 			PodCIDRs: []PodCIDR{
 				{
 					Id:      "id-test",
-					Network: DefaultPodNetworkName,
+					Network: "default",
 					CIDR:    "10.0.0.0/24",
 					Condition: &metav1.Condition{
 						Type:   string(PodCIDRConditionReady),
 						Status: metav1.ConditionTrue,
-						Reason: string(PodCIDRReady),
 					},
 				},
 			},
 			Conditions: []metav1.Condition{
 				{
-					Type:   string(NodeNetworkConfigConditionInvalidParameters),
+					Type:   string(NodeNetworkConfigConditionReady),
 					Status: metav1.ConditionTrue,
 					Reason: string(NodeNetworkConfigInvalidParametersReason),
 				},
@@ -77,8 +76,8 @@ func TestNodeNetworkConfig(t *testing.T) {
 	if podCIDR.Id != "id-test" {
 		t.Errorf("expected podCIDR id 'id-test', got %q", podCIDR.Id)
 	}
-	if podCIDR.Network != DefaultPodNetworkName {
-		t.Errorf("expected podCIDR network %q, got %q", DefaultPodNetworkName, podCIDR.Network)
+	if podCIDR.Network != "default" {
+		t.Errorf("expected podCIDR network %q, got %q", "default", podCIDR.Network)
 	}
 	if podCIDR.CIDR != "10.0.0.0/24" {
 		t.Errorf("expected podCIDR CIDR '10.0.0.0/24', got %q", podCIDR.CIDR)
@@ -91,8 +90,8 @@ func TestNodeNetworkConfig(t *testing.T) {
 		t.Fatalf("expected 1 condition, got %d", len(nnc.Status.Conditions))
 	}
 	condition := nnc.Status.Conditions[0]
-	if condition.Type != string(NodeNetworkConfigConditionInvalidParameters) {
-		t.Errorf("expected condition type %q, got %q", NodeNetworkConfigConditionInvalidParameters, condition.Type)
+	if condition.Type != string(NodeNetworkConfigConditionReady) {
+		t.Errorf("expected condition type %q, got %q", NodeNetworkConfigConditionReady, condition.Type)
 	}
 	if condition.Status != metav1.ConditionTrue {
 		t.Errorf("expected condition status True, got %q", condition.Status)

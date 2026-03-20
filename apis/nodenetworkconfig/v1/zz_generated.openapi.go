@@ -45,7 +45,7 @@ func schema_gke_networking_api_apis_nodenetworkconfig_v1_Allocation(ref common.R
 				Properties: map[string]spec.Schema{
 					"network": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Network is the name of the network. The default is \"gke-pod-network\".",
+							Description: "Network is the name of the network. The default is \"default\".",
 							Type:        []string{"string"},
 							Format:      "",
 						},

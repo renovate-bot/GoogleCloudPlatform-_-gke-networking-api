@@ -55,21 +55,17 @@ type NodeNetworkConfigSpec struct {
 	ReleasableCIDRs []PodCIDR `json:"releasableCIDRs,omitempty" patchStrategy:"merge" patchMergeKey:"id"`
 }
 
-const (
-	// DefaultPodNetworkName is the name of the default pod network.
-	DefaultPodNetworkName = "gke-pod-network"
-)
-
 // Allocation describes the network allocation for a specific network.
 // +k8s:openapi-gen=true
 type Allocation struct {
-	// Network is the name of the network. The default is "gke-pod-network".
+	// Network is the name of the network. The default is "default".
 	// +optional
-	// +kubebuilder:default="gke-pod-network"
+	// +kubebuilder:default="default"
 	Network string `json:"network,omitempty"`
 
 	// Pods is the number of pods allocated from this network.
 	// +required
+	// +kubebuilder:validation:Minimum=0
 	Pods int32 `json:"pods"`
 }
 
@@ -128,40 +124,36 @@ type PodCIDRConditionType string
 const (
 	// PodCIDRConditionReady means the pod CIDR is ready.
 	PodCIDRConditionReady PodCIDRConditionType = "Ready"
-	// PodCIDRConditionNotReady means the pod CIDR is not ready.
-	PodCIDRConditionNotReady PodCIDRConditionType = "NotReady"
 )
 
-// PodCIDRConditionReason describes the reason for a particular PodCIDRConditionType.
-type PodCIDRConditionReason string
+// PodCIDRReadyConditionReason describes the reason for a particular PodCIDRConditionType.
+type PodCIDRReadyConditionReason string
 
 const (
-	// PodCIDRReady is the reason when the pod CIDR is ready.
-	PodCIDRReady PodCIDRConditionReason = "PodCIDRReady"
-	// PodCIDRNotReady is the reason when the pod CIDR is not ready.
-	PodCIDRNotReady PodCIDRConditionReason = "PodCIDRNotReady"
+	// PodCIDRReadyConditionReady is the reason when the pod CIDR is ready, i.e. the condition is true.
+	PodCIDRReadyConditionReady PodCIDRReadyConditionReason = "PodCIDRReady"
+	// PodCIDRReadyConditionNotRoutable is the reason when the pod CIDR is not routable.
+	PodCIDRReadyConditionNotRoutable PodCIDRReadyConditionReason = "PodCIDRNotRoutable"
 )
 
-// NodeNetworkConfigConditionType is a valid condition type that should be used in NodeNetworkConfigStatus.Conditions.
-type NodeNetworkConfigConditionType string
+// NodeNetworkConfigReadyConditionType is a valid condition type that should be used in NodeNetworkConfigStatus.Conditions.
+type NodeNetworkConfigReadyConditionType string
 
 const (
-	// NodeNetworkConfigConditionInvalidParameters means the node network config has invalid parameters.
-	NodeNetworkConfigConditionInvalidParameters NodeNetworkConfigConditionType = "InvalidParameters"
-	// NodeNetworkConfigConditionQuotaExceeded means the node network config has exceeded the quota.
-	NodeNetworkConfigConditionQuotaExceeded NodeNetworkConfigConditionType = "QuotaExceeded"
-	// NodeNetworkConfigConditionPermissionErrors means the node network config has permission errors.
-	NodeNetworkConfigConditionPermissionErrors NodeNetworkConfigConditionType = "PermissionErrors"
+	// NodeNetworkConfigConditionReady means the node network config is ready.
+	NodeNetworkConfigConditionReady NodeNetworkConfigReadyConditionType = "Ready"
 )
 
-// NodeNetworkConfigConditionReason describes the reason for a particular NodeNetworkConfigConditionType.
-type NodeNetworkConfigConditionReason string
+// NodeNetworkConfigReadyConditionReason describes the reason for a particular NodeNetworkConfigConditionType.
+type NodeNetworkConfigReadyConditionReason string
 
 const (
+	// NodeNetworkConfigReadyReason is the reason when the node network config is ready, i.e. the condition is true.
+	NodeNetworkConfigReadyReason NodeNetworkConfigReadyConditionReason = "NodeNetworkConfigReady"
 	// NodeNetworkConfigInvalidParametersReason is the reason when there are invalid parameters to update network interface pod CIDRs.
-	NodeNetworkConfigInvalidParametersReason NodeNetworkConfigConditionReason = "InvalidParametersToUpdateNetworkInterfacePodCIDRs"
+	NodeNetworkConfigInvalidParametersReason NodeNetworkConfigReadyConditionReason = "InvalidParametersToUpdateNetworkInterfacePodCIDRs"
 	// NodeNetworkConfigQuotaExceededReason is the reason when the quota is exceeded to update network interface pod CIDRs.
-	NodeNetworkConfigQuotaExceededReason NodeNetworkConfigConditionReason = "QuotaExceededToUpdateNetworkInterfacePodCIDRs"
+	NodeNetworkConfigQuotaExceededReason NodeNetworkConfigReadyConditionReason = "QuotaExceededToUpdateNetworkInterfacePodCIDRs"
 	// NodeNetworkConfigPermissionErrorsReason is the reason when there are permission errors to update network interface pod CIDRs.
-	NodeNetworkConfigPermissionErrorsReason NodeNetworkConfigConditionReason = "PermissionErrorsToUpdateNetworkInterfacePodCIDRs"
+	NodeNetworkConfigPermissionErrorsReason NodeNetworkConfigReadyConditionReason = "PermissionErrorsToUpdateNetworkInterfacePodCIDRs"
 )

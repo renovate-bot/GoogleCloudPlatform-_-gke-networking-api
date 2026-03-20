@@ -62,14 +62,15 @@ spec:
                     network.
                   properties:
                     network:
-                      default: gke-pod-network
+                      default: default
                       description: Network is the name of the network. The default
-                        is "gke-pod-network".
+                        is "default".
                       type: string
                     pods:
                       description: Pods is the number of pods allocated from this
                         network.
                       format: int32
+                      minimum: 0
                       type: integer
                   required:
                   - pods
