@@ -19,120 +19,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1 "github.com/GoogleCloudPlatform/gke-networking-api/apis/nodenetworkconfig/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	nodenetworkconfigv1 "github.com/GoogleCloudPlatform/gke-networking-api/client/nodenetworkconfig/clientset/versioned/typed/nodenetworkconfig/v1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeNodeNetworkConfigs implements NodeNetworkConfigInterface
-type FakeNodeNetworkConfigs struct {
+// fakeNodeNetworkConfigs implements NodeNetworkConfigInterface
+type fakeNodeNetworkConfigs struct {
+	*gentype.FakeClientWithList[*v1.NodeNetworkConfig, *v1.NodeNetworkConfigList]
 	Fake *FakeNetworkingV1
 }
 
-var nodenetworkconfigsResource = v1.SchemeGroupVersion.WithResource("nodenetworkconfigs")
-
-var nodenetworkconfigsKind = v1.SchemeGroupVersion.WithKind("NodeNetworkConfig")
-
-// Get takes name of the nodeNetworkConfig, and returns the corresponding nodeNetworkConfig object, and an error if there is any.
-func (c *FakeNodeNetworkConfigs) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.NodeNetworkConfig, err error) {
-	emptyResult := &v1.NodeNetworkConfig{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootGetActionWithOptions(nodenetworkconfigsResource, name, options), emptyResult)
-	if obj == nil {
-		return emptyResult, err
+func newFakeNodeNetworkConfigs(fake *FakeNetworkingV1) nodenetworkconfigv1.NodeNetworkConfigInterface {
+	return &fakeNodeNetworkConfigs{
+		gentype.NewFakeClientWithList[*v1.NodeNetworkConfig, *v1.NodeNetworkConfigList](
+			fake.Fake,
+			"",
+			v1.SchemeGroupVersion.WithResource("nodenetworkconfigs"),
+			v1.SchemeGroupVersion.WithKind("NodeNetworkConfig"),
+			func() *v1.NodeNetworkConfig { return &v1.NodeNetworkConfig{} },
+			func() *v1.NodeNetworkConfigList { return &v1.NodeNetworkConfigList{} },
+			func(dst, src *v1.NodeNetworkConfigList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.NodeNetworkConfigList) []*v1.NodeNetworkConfig {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1.NodeNetworkConfigList, items []*v1.NodeNetworkConfig) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1.NodeNetworkConfig), err
-}
-
-// List takes label and field selectors, and returns the list of NodeNetworkConfigs that match those selectors.
-func (c *FakeNodeNetworkConfigs) List(ctx context.Context, opts metav1.ListOptions) (result *v1.NodeNetworkConfigList, err error) {
-	emptyResult := &v1.NodeNetworkConfigList{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootListActionWithOptions(nodenetworkconfigsResource, nodenetworkconfigsKind, opts), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1.NodeNetworkConfigList{ListMeta: obj.(*v1.NodeNetworkConfigList).ListMeta}
-	for _, item := range obj.(*v1.NodeNetworkConfigList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested nodeNetworkConfigs.
-func (c *FakeNodeNetworkConfigs) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewRootWatchActionWithOptions(nodenetworkconfigsResource, opts))
-}
-
-// Create takes the representation of a nodeNetworkConfig and creates it.  Returns the server's representation of the nodeNetworkConfig, and an error, if there is any.
-func (c *FakeNodeNetworkConfigs) Create(ctx context.Context, nodeNetworkConfig *v1.NodeNetworkConfig, opts metav1.CreateOptions) (result *v1.NodeNetworkConfig, err error) {
-	emptyResult := &v1.NodeNetworkConfig{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateActionWithOptions(nodenetworkconfigsResource, nodeNetworkConfig, opts), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1.NodeNetworkConfig), err
-}
-
-// Update takes the representation of a nodeNetworkConfig and updates it. Returns the server's representation of the nodeNetworkConfig, and an error, if there is any.
-func (c *FakeNodeNetworkConfigs) Update(ctx context.Context, nodeNetworkConfig *v1.NodeNetworkConfig, opts metav1.UpdateOptions) (result *v1.NodeNetworkConfig, err error) {
-	emptyResult := &v1.NodeNetworkConfig{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateActionWithOptions(nodenetworkconfigsResource, nodeNetworkConfig, opts), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1.NodeNetworkConfig), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeNodeNetworkConfigs) UpdateStatus(ctx context.Context, nodeNetworkConfig *v1.NodeNetworkConfig, opts metav1.UpdateOptions) (result *v1.NodeNetworkConfig, err error) {
-	emptyResult := &v1.NodeNetworkConfig{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceActionWithOptions(nodenetworkconfigsResource, "status", nodeNetworkConfig, opts), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1.NodeNetworkConfig), err
-}
-
-// Delete takes name of the nodeNetworkConfig and deletes it. Returns an error if one occurs.
-func (c *FakeNodeNetworkConfigs) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteActionWithOptions(nodenetworkconfigsResource, name, opts), &v1.NodeNetworkConfig{})
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeNodeNetworkConfigs) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionActionWithOptions(nodenetworkconfigsResource, opts, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1.NodeNetworkConfigList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched nodeNetworkConfig.
-func (c *FakeNodeNetworkConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.NodeNetworkConfig, err error) {
-	emptyResult := &v1.NodeNetworkConfig{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceActionWithOptions(nodenetworkconfigsResource, name, pt, data, opts, subresources...), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1.NodeNetworkConfig), err
 }

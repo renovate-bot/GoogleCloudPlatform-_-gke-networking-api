@@ -29,7 +29,7 @@ type FakeNetworkingV1 struct {
 }
 
 func (c *FakeNetworkingV1) NodeNetworkConfigs() v1.NodeNetworkConfigInterface {
-	return &FakeNodeNetworkConfigs{c}
+	return newFakeNodeNetworkConfigs(c)
 }
 
 // RESTClient returns a RESTClient that is used to communicate
