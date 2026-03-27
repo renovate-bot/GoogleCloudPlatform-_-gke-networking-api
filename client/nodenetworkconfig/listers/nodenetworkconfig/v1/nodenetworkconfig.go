@@ -19,10 +19,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/GoogleCloudPlatform/gke-networking-api/apis/nodenetworkconfig/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/listers"
-	"k8s.io/client-go/tools/cache"
+	nodenetworkconfigv1 "github.com/GoogleCloudPlatform/gke-networking-api/apis/nodenetworkconfig/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // NodeNetworkConfigLister helps list NodeNetworkConfigs.
@@ -30,19 +30,19 @@ import (
 type NodeNetworkConfigLister interface {
 	// List lists all NodeNetworkConfigs in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.NodeNetworkConfig, err error)
+	List(selector labels.Selector) (ret []*nodenetworkconfigv1.NodeNetworkConfig, err error)
 	// Get retrieves the NodeNetworkConfig from the index for a given name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.NodeNetworkConfig, error)
+	Get(name string) (*nodenetworkconfigv1.NodeNetworkConfig, error)
 	NodeNetworkConfigListerExpansion
 }
 
 // nodeNetworkConfigLister implements the NodeNetworkConfigLister interface.
 type nodeNetworkConfigLister struct {
-	listers.ResourceIndexer[*v1.NodeNetworkConfig]
+	listers.ResourceIndexer[*nodenetworkconfigv1.NodeNetworkConfig]
 }
 
 // NewNodeNetworkConfigLister returns a new NodeNetworkConfigLister.
 func NewNodeNetworkConfigLister(indexer cache.Indexer) NodeNetworkConfigLister {
-	return &nodeNetworkConfigLister{listers.New[*v1.NodeNetworkConfig](indexer, v1.Resource("nodenetworkconfig"))}
+	return &nodeNetworkConfigLister{listers.New[*nodenetworkconfigv1.NodeNetworkConfig](indexer, nodenetworkconfigv1.Resource("nodenetworkconfig"))}
 }

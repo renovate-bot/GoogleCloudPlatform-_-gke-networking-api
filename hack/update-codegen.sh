@@ -40,6 +40,19 @@ source "${SCRIPT_ROOT}/hack/kube_codegen.sh"
 
 THIS_PKG="github.com/GoogleCloudPlatform/gke-networking-api"
 
+# kube_codegen does not currently support register-gen or openapi-gen.
+# Install all tools from the dedicated hack module so root go.mod stays untouched.
+(
+  cd "$(dirname "${0}")"
+  GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen
+  GO111MODULE=on go install k8s.io/code-generator/cmd/register-gen
+  GO111MODULE=on go install k8s.io/kube-openapi/cmd/openapi-gen
+)
+
+# Go installs the above commands to get installed in $GOBIN if defined, and $GOPATH/bin otherwise:
+GOBIN="$(go env GOBIN)"
+gobin="${GOBIN:-$(go env GOPATH)/bin}"
+
 for crd in "network" "gcpfirewall" "nodetopology" "fqdnnetworkpolicy" "nodenetworkconfig"; do
   echo "Generating $crd CRD client"
   kube::codegen::gen_client \
@@ -51,26 +64,11 @@ for crd in "network" "gcpfirewall" "nodetopology" "fqdnnetworkpolicy" "nodenetwo
       "${SCRIPT_ROOT}/apis"
 
   echo "Generating $crd CRD artifacts"
-  go run sigs.k8s.io/controller-tools/cmd/controller-gen crd \
+  "${gobin}/controller-gen" crd \
     object:headerFile="${SCRIPT_ROOT}/hack/boilerplate.go.txt" \
     paths="${SCRIPT_ROOT}/apis/$crd/..." \
     output:crd:dir="${SCRIPT_ROOT}/config/crds"
 done
-
-
-# kube_codegen does not currently support register-gen.
-# As a workaround, we invoke the register-gen script directly.
-(
-  # To support running this script from anywhere, first cd into this directory,
-  # and then install with forced module mode on and fully qualified name.
-  cd "$(dirname "${0}")"
-  GO111MODULE=on go install k8s.io/code-generator/cmd/register-gen
-  GO111MODULE=on go install k8s.io/kube-openapi/cmd/openapi-gen
-)
-
-# Go installs the above commands to get installed in $GOBIN if defined, and $GOPATH/bin otherwise:
-GOBIN="$(go env GOBIN)"
-gobin="${GOBIN:-$(go env GOPATH)/bin}"
 
 for crd_with_version in "network/v1" "gcpfirewall/v1" "nodetopology/v1" "fqdnnetworkpolicy/v1alpha1" "nodenetworkconfig/v1"; do
   echo "Generating register for CRD $crd_with_version"
